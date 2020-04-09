@@ -13,51 +13,55 @@ public class CmdMove implements ICommand, Serializable {
 	@Override
 	public Game exec(Game game, BufferedReader bufferedReader,String inputString) throws GooseException {
 		String nome;
-		String dice1;
-		String dice2;
+		String dice1="";
+		String dice2="";
+		int dice1Int;
+		int dice2Int;
+		boolean automaticDice=false;
 		if (game.getGameFinished()) {
 			  System.out.println(" game is finisched ");
 		}
-		if (game.getThePlayers()!=null && game.getThePlayers().size()>0) {
-			
-			
+		if (game.getThePlayers()!=null && game.getThePlayers().size()>0) {	
+			for (Player pPres : game.getThePlayers()) {
+				if (inputString.trim().replace(" ","").toUpperCase().equals("MOVE"+pPres.toString().toUpperCase())) {
+					automaticDice=true;
+					break;
+				}
+			}
 			try {
 				String[] sts = inputString.split(" ");
 				nome = sts[1];
+				if  (!automaticDice) {	
 				dice1 = sts[2];
 				dice1=dice1.replace(",", "");
 				dice2 = sts[3];
+				dice1Int=Integer.parseInt(dice1);
+			    dice2Int=Integer.parseInt(dice2);
+				if ((dice1Int<0 || dice1Int>6) || (dice2Int<0 || dice2Int>6)) {
+						throw new  GooseException("error digit dice is  number >0 and <=6 es: move <name> 1,2 ");
+				}
+				
+				}
 			} catch (IndexOutOfBoundsException e1) {
 				throw new  GooseException("error digit command BEWARE the space blanc in istruction move<space><name><space><dice1>,<space><dice2>");
+			} catch (NumberFormatException e) {
+				throw new  GooseException("error digit dice is not number es: move <name> 1,2 ");
 			}
 			Player pToMove=null;
 			for (Player p : game.getThePlayers()) {
 				if (p.name.toUpperCase().equals(nome.toUpperCase())) {
 					pToMove=p;
 					break;
-				}
-					
-			}
-			try {
-				int dice1Int=Integer.parseInt(dice1);
-				int dice2Int=Integer.parseInt(dice2);
-				if ((dice1Int<0 || dice1Int>6) || (dice2Int<0 || dice2Int>6)) {
-					throw new  GooseException("error digit dice is  number >0 and <=6 es: move <name> 1,2 ");
-				}
-			} catch (NumberFormatException e) {
-				throw new  GooseException("error digit dice is not number es: move <name> 1,2 ");
+				}				
 			}
 			if (pToMove!=null) {
 			int boardSize = game.getBoard().getNbOfCells() - 1;
 			
-			/* For  player we are going to throw the dice */
-			
-			
-				
+			/* For  player we are going to throw the dice */			
 				/*We check if the player can leave the cell */
 				if (pToMove.getCell().canBeLeft()) {
 					
-					int result = Integer.parseInt(dice1)+ Integer.parseInt(dice2);
+					int result = !automaticDice?Integer.parseInt(dice1)+ Integer.parseInt(dice2):pToMove.twoDiceThrow();
 					
 					/* Compute the new index of the player */
 					int currentIndex = pToMove.getCell().getIndex();

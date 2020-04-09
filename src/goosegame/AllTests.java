@@ -69,6 +69,19 @@ public class AllTests {
 	}
 	
 	
+	@Test
+	public void tesFactoryCommand() {
+	System.out.println("tesFactoryCommand");
+	try {
+		assertEquals(FactoryCommand.getCommand("add player").getClass(),CmdAddPlayer.class);
+		assertEquals(FactoryCommand.getCommand("move").getClass(),CmdMove.class);
+	} catch (GooseException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	}
+	
 
 }
 
